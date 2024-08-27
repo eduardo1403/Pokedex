@@ -1,0 +1,79 @@
+﻿@page "/serchPokemonByName"
+
+@inject PokemonService PokemonService
+
+<h3>Buscar pokemon por su Nombre</h3>
+
+<div class="row g-3 align-items-end">
+    <div class="col-6">
+        <label for="idPokemon" class="form-label">Nombre del Pokemon</label>
+        <input type="text" id="idPokemon" @bind="Name" class="form-control" aria-describedby="pokemonIndications">
+
+    </div>
+    <div class="col-6">
+        <button @onclick="SearchPokemonName" class="btn btn-primary">Buscar</button>
+    </div>
+    <span id="pokemonIndications" class="form-text">
+        Para buscar debes ingresar un nombre de un pokemon.
+    </span>
+</div>
+<br />
+<br />
+
+
+@if (pokemon != null)
+{
+    <div class="card-container">
+        <div class="card">
+            <div class="card-header">
+                <h2>@pokemon.Name</h2>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(pokemon.Sprites?.Back_default))
+                {
+                    <img src="@pokemon.Sprites.Back_default" alt="@pokemon.Name" class="pokemon-image" />
+                }
+                else
+                {
+                    <p>No hay imagen disponible.</p>
+                }
+                <p><strong>Peso:</strong> @pokemon.Weight</p>
+            </div>
+        </div>
+    </div>
+}
+else if (!isLoading)
+{
+    <p>Esperando busqueda...</p>
+}
+<p>@messageError</p>
+
+@code {
+    private string Name;
+    private Pokemon pokemon;
+    private bool isLoading = false;
+    private string messageError = "";
+
+    private async Task SearchPokemonName()
+    {
+        try
+        {
+            isLoading = true;
+            messageError = ""; // Limpia cualquier error anterior
+
+            pokemon = await PokemonService.GetPokemonByName(Name);
+        }
+        catch (HttpRequestException httpEx)
+        {
+            messageError = $"Error en la solicitud: {httpEx.Message}";
+        }
+        catch (Exception)
+        {
+            messageError = $"El pokemon no fue encontrado";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

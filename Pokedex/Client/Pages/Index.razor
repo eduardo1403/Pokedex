@@ -1,0 +1,67 @@
+﻿@page "/"
+
+
+@inject NavigationManager NavigationManager
+@inject PokemonService PokemonService
+
+<h3>Pokemon API</h3>
+
+<button type="button" @onclick="SearchPokemons" class="btn btn-dark">Buscar un Pokemon por Id</button>
+<button type="button"  @onclick="SearchPokemonsByName" class="btn btn-dark">Buscar un Pokemon por Nombre</button>
+
+<br />
+<br />
+<br />
+
+
+@if (pokemons == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!pokemons.Any())
+{
+    <p>No se encontraron Pokémon.</p>
+}
+else
+{
+    <div class="card-container">
+        @foreach (var pokemon in pokemons)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h2>@pokemon.Name</h2>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(pokemon.Sprites?.Back_default))
+                    {
+                        <img src="@pokemon.Sprites.Back_default" alt="@pokemon.Name" class="pokemon-image" />
+                    }
+                    else
+                    {
+                        <p>No hay imagen disponible.</p>
+                    }
+                    <p><strong>Peso:</strong> @pokemon.Weight</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Pokemon> pokemons;
+
+    protected override async Task OnInitializedAsync()
+    {
+        pokemons = await PokemonService.GetPokemons();
+    }
+
+    private async Task SearchPokemons()
+    {
+        NavigationManager.NavigateTo("/search_pokemons");
+    }
+
+    private async Task SearchPokemonsByName()
+    {
+        NavigationManager.NavigateTo("/serchPokemonByName");
+    }
+}

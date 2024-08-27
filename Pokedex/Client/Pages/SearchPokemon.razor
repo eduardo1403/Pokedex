@@ -1,0 +1,84 @@
+﻿@page "/search_pokemons"
+
+@inject PokemonService PokemonService
+
+<h3>Busca Pokemo por su Id</h3>
+
+<div class="row g-3 align-items-end">
+    <div class="col-6">
+        <label for="idPokemon" class="form-label">Id Pokemon</label>
+        <input type="number" id="idPokemon" @bind="Id" class="form-control" aria-describedby="pokemonIndications">
+        
+    </div>
+    <div class="col-6">
+        <button @onclick="SearchProduct" class="btn btn-primary">Buscar</button>
+    </div>
+    <span id="pokemonIndications" class="form-text">
+        Para buscar debes ingresar un numero del 1 al 1025.
+    </span>
+</div>
+<br />
+<br />
+
+
+
+@if (pokemon != null)
+{
+    <div class="card-container">
+        <div class="card">
+            <div class="card-header">
+                <h2>@pokemon.Name</h2>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(pokemon.Sprites?.Back_default))
+                {
+                    <img src="@pokemon.Sprites.Back_default" alt="@pokemon.Name" class="pokemon-image" />
+                }
+                else
+                {
+                    <p>No hay imagen disponible.</p>
+                }
+                <p><strong>Peso:</strong> @pokemon.Weight</p>
+            </div>
+        </div>
+    </div>
+}
+else if (!isLoading)
+{
+    <p>Esperando busqueda...</p>
+}
+else if (Id == 0)
+{
+    <p>@messageError</p>
+}
+
+@code {
+    private int Id;
+    private Pokemon pokemon;
+    private bool isLoading = false;
+    private string messageError = "Pokemon no encontrado";
+
+    private async Task SearchProduct()
+    {
+        try
+        {
+            isLoading = true;
+            messageError = ""; // Limpia cualquier error anterior
+
+            pokemon = await PokemonService.GetPokemonById(Id);
+
+        }
+        catch (HttpRequestException httpEx)
+        {
+            // Manejo de excepciones relacionadas con solicitudes HTTP
+            messageError = $"Error al obtener el Pokémon: {httpEx.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    
+    }
+
+}
+
